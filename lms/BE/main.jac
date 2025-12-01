@@ -21,8 +21,8 @@ node Lesson {
     has id: str;
     has title: str;
     has content: str;
-    has order: int;            # Non-default arguments first
     has course_id: str;
+    has order: int;
     has video_url: str = "";   # Default arguments last
 }
 
@@ -139,8 +139,8 @@ walker create_lesson {
     has course_id: str;
     has title: str;
     has content: str;
-    has video_url: str = "";
     has order: int;
+    has video_url: str = "";
     
     can create with `root entry {
         lesson_id = f"{self.course_id}_lesson_{self.order}";
@@ -149,9 +149,9 @@ walker create_lesson {
             id=lesson_id,
             title=self.title,
             content=self.content,
-            video_url=self.video_url,
+            course_id=self.course_id,
             order=self.order,
-            course_id=self.course_id
+            video_url=self.video_url
         );
         
         here ++> new_lesson;
@@ -271,4 +271,31 @@ walker render_course_list {
         
         report {"content": html};
     }
+}
+
+# ==================== FRONTEND WALKERS ====================
+
+walker view_courses {
+    can display with `root entry {
+        courses = [];
+        for course_node in [-->(`?Course)] {
+            courses.append({
+                "id": course_node.id,
+                "title": course_node.title,
+                "description": course_node.description,
+                "instructor": course_node.instructor,
+                "duration": course_node.duration,
+                "level": course_node.level
+            });
+        }
+        
+        report courses;
+    }
+}
+        
+# ==================== CLI ENTRY POINT ====================
+
+# Will run when in CLI mode (not in cloud)
+with entry:__main__ {
+    root spawn test_lms();
 }
