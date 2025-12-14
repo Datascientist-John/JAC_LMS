@@ -23,7 +23,7 @@ node Lesson {
     has content: str;
     has course_id: str;
     has order: int;
-    has video_url: str = "";   # Default arguments last
+    has video_url: str = "";
 }
 
 node Assignment {
@@ -63,7 +63,6 @@ walker create_course {
     has level: str;
     
     can create with `root entry {
-        # Generate simple ID based on title
         course_id = self.title.replace(" ", "_").lower();
         
         new_course = Course(
@@ -90,7 +89,6 @@ walker create_student {
     has email: str;
     
     can create with `root entry {
-        # Use email as ID
         student_id = self.email;
         
         new_student = Student(
@@ -112,25 +110,44 @@ walker create_student {
 walker enroll_student {
     has student_id: str;
     has course_id: str;
+    has found: bool = False;
     
     can enroll with `root entry {
-        visit [-->(`?Student)];
-    }
-    
-    can process with Student entry {
-        if here.id == self.student_id {
-            if self.course_id not in here.enrolled_courses {
-                here.enrolled_courses.append(self.course_id);
-                report {
-                    "success": True,
-                    "message": "Student enrolled successfully"
-                };
-            } else {
-                report {
-                    "success": False,
-                    "message": "Student already enrolled"
-                };
+        # Process students directly without visit
+        for student_node in [-->(`?Student)] {
+            if student_node.id == self.student_id {
+                if self.course_id not in student_node.enrolled_courses {
+                    student_node.enrolled_courses.append(self.course_id);
+                    
+                    # Update course enrollment count
+                    for course_node in [-->(`?Course)] {
+                        if course_node.id == self.course_id {
+                            course_node.enrolled_count += 1;
+                            break;
+                        }
+                    }
+                    
+                    report {
+                        "success": True,
+                        "message": "Student enrolled successfully"
+                    };
+                    self.found = True;
+                } else {
+                    report {
+                        "success": False,
+                        "message": "Student already enrolled"
+                    };
+                    self.found = True;
+                }
+                break;
             }
+        }
+        
+        if not self.found {
+            report {
+                "success": False,
+                "message": "Student not found"
+            };
         }
     }
 }
@@ -208,72 +225,135 @@ walker get_students {
     }
 }
 
+walker get_course_details {
+    has course_id: str;
+    
+    can fetch with `root entry {
+        for course_node in [-->(`?Course)] {
+            if course_node.id == self.course_id {
+                # Get lessons for this course
+                lessons = [];
+                for lesson_node in [-->(`?Lesson)] {
+                    if lesson_node.course_id == self.course_id {
+                        lessons.append({
+                            "id": lesson_node.id,
+                            "title": lesson_node.title,
+                            "content": lesson_node.content,
+                            "order": lesson_node.order,
+                            "video_url": lesson_node.video_url
+                        });
+                    }
+                }
+                
+                # Get assignments for this course
+                assignments = [];
+                for assignment_node in [-->(`?Assignment)] {
+                    if assignment_node.course_id == self.course_id {
+                        assignments.append({
+                            "id": assignment_node.id,
+                            "title": assignment_node.title,
+                            "description": assignment_node.description,
+                            "due_date": assignment_node.due_date,
+                            "max_score": assignment_node.max_score
+                        });
+                    }
+                }
+                
+                report {
+                    "success": True,
+                    "course": {
+                        "id": course_node.id,
+                        "title": course_node.title,
+                        "description": course_node.description,
+                        "instructor": course_node.instructor,
+                        "duration": course_node.duration,
+                        "level": course_node.level,
+                        "enrolled_count": course_node.enrolled_count
+                    },
+                    "lessons": lessons,
+                    "assignments": assignments
+                };
+                return;
+            }
+        }
+        
+        report {
+            "success": False,
+            "message": "Course not found"
+        };
+    }
+}
+
 walker test_lms {
     can run_tests with `root entry {
         print("=== Testing LMS Backend ===");
         
-        # Add courses directly
-        c1 = Course(id="1", title="Python Basics", description="Learn Python", instructor="Dr. Jac", duration="6 weeks", level="beginner");
+        # Add courses
+        c1 = Course(
+            id="python_basics",
+            title="Python Basics",
+            description="Learn Python from scratch",
+            instructor="Dr. Jac",
+            duration="6 weeks",
+            level="beginner"
+        );
         here ++> c1;
-        print("Added: Python Basics");
+        print("✓ Added: Python Basics");
         
-        c2 = Course(id="2", title="Data Science", description="Data analysis", instructor="Prof. Jayson", duration="10 weeks", level="intermediate");
+        c2 = Course(
+            id="data_science",
+            title="Data Science",
+            description="Introduction to Data Science",
+            instructor="Prof. Jayson",
+            duration="10 weeks",
+            level="intermediate"
+        );
         here ++> c2;
-        print("Added: Data Science");
+        print("✓ Added: Data Science");
         
-        # Get courses directly (no spawn)
+        # Add students
+        s1 = Student(
+            id="student1@example.com",
+            name="Alice Johnson",
+            email="student1@example.com"
+        );
+        here ++> s1;
+        print("✓ Added: Alice Johnson");
+        
+        # Add lessons
+        l1 = Lesson(
+            id="python_basics_lesson_1",
+            title="Introduction to Python",
+            content="Learn the basics of Python programming",
+            course_id="python_basics",
+            order=1,
+            video_url="https://example.com/video1"
+        );
+        here ++> l1;
+        print("✓ Added: Lesson 1");
+        
+        # Get all courses
         courses = [];
         for course_node in [-->(`?Course)] {
             courses.append({
                 "id": course_node.id,
                 "title": course_node.title,
-                "description": course_node.description,
-                "instructor": course_node.instructor,
-                "duration": course_node.duration,
-                "level": course_node.level
-            });
-        }
-        
-        print(f"\nFound {len(courses)} courses:");
-        for course in courses {
-            print(f"  - {course['title']} by {course['instructor']}");
-        }
-        
-        # Test HTML rendering
-        html = "<div class='courses'>";
-        for course in courses {
-            html += f"<div class='course'>{course['title']}</div>";
-        }
-        html += "</div>";
-        print(f"\nHTML Output:\n{html}");
-        
-        report {"success": True, "total_courses": len(courses), "html": html};
-    }
-}
-
-walker render_course_list {
-    can display with `root entry {
-        # Get courses directly without spawn
-        courses = [];
-        for course_node in [-->(`?Course)] {
-            courses.append({
-                "title": course_node.title,
-                "id": course_node.id,
                 "instructor": course_node.instructor
             });
         }
         
-        html = "<div class='courses'>";
+        print(f"\n✓ Found {len(courses)} courses:");
         for course in courses {
-            html += f"<div class='course'>{course['title']}</div>";
+            print(f"  - {course['title']} by {course['instructor']}");
         }
-        html += "</div>";
         
-        report {"content": html};
+        report {
+            "success": True,
+            "total_courses": len(courses),
+            "message": "LMS test completed successfully"
+        };
     }
 }
-
-# ==================== FRONTEND WALKERS ====================
 
 walker view_courses {
     can display with `root entry {
@@ -285,17 +365,17 @@ walker view_courses {
                 "description": course_node.description,
                 "instructor": course_node.instructor,
                 "duration": course_node.duration,
-                "level": course_node.level
+                "level": course_node.level,
+                "enrolled_count": course_node.enrolled_count
             });
         }
         
         report courses;
     }
 }
-        
+
 # ==================== CLI ENTRY POINT ====================
 
-# Will run when in CLI mode (not in cloud)
 with entry:__main__ {
     root spawn test_lms();
 }
