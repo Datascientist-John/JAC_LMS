@@ -213,11 +213,11 @@ walker test_lms {
         print("=== Testing LMS Backend ===");
         
         # Add courses directly
-        c1 = Course(id="1", title="Python Basics", description="Learn Python", instructor="Dr. Smith", duration="6 weeks", level="beginner");
+        c1 = Course(id="1", title="Python Basics", description="Learn Python", instructor="Dr. Jac", duration="6 weeks", level="beginner");
         here ++> c1;
         print("Added: Python Basics");
         
-        c2 = Course(id="2", title="Data Science", description="Data analysis", instructor="Prof. Johnson", duration="10 weeks", level="intermediate");
+        c2 = Course(id="2", title="Data Science", description="Data analysis", instructor="Prof. Jayson", duration="10 weeks", level="intermediate");
         here ++> c2;
         print("Added: Data Science");
         
