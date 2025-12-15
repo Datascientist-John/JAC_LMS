@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #66ea85 0%, #4c4ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,6 +23,111 @@
             margin: 0 auto;
         }
 
+        /* ============= AUTH STYLES ============= */
+        .auth-container {
+            max-width: 450px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .user-info {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-details {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logout-btn {
+            padding: 8px 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        /* ============= EXISTING STYLES ============= */
         header {
             background: white;
             padding: 30px;
@@ -33,7 +138,7 @@
         }
 
         h1 {
-            color: #ea669b;
+            color: #667eea;
             font-size: 2.5em;
             margin-bottom: 10px;
         }
@@ -62,7 +167,7 @@
         }
 
         .tab-btn.active {
-            background: #ea667c6e6e6e6e6e;
+            background: #667eea;
             color: white;
         }
 
@@ -163,6 +268,11 @@
             background: #5568d3;
         }
 
+        button[type="submit"]:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
         .students-list {
             margin-top: 20px;
         }
@@ -218,10 +328,84 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- ============= AUTH SCREEN ============= -->
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-header">
+            <h1> LMS</h1>
+            <p>Learning Management System</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" onclick="showAuthTab('login')">Login</button>
+            <button class="auth-tab-btn" onclick="showAuthTab('register')">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-form" class="auth-form active">
+            <div id="login-message"></div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="auth-form">
+            <div id="register-message"></div>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" name="password" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label>Role:</label>
+                    <select name="role" required>
+                        <option value="student">Student</option>
+                        <option value="instructor">Instructor</option>
+                    </select>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============= MAIN APP (Hidden until login) ============= -->
+    <div id="main-app" class="container hidden">
+        <!-- User Info Bar -->
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div>
+                    <div style="font-weight: 600;" id="user-name">User Name</div>
+                    <div style="font-size: 0.9em; color: #666;" id="user-email">email@example.com</div>
+                </div>
+                <span class="role-badge" id="user-role">Student</span>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
         <header>
             <h1> Learning Management System</h1>
             <p>Manage your courses, students, and assignments</p>
@@ -231,8 +415,8 @@
             <button class="tab-btn active" onclick="showTab('courses')">View Courses</button>
             <button class="tab-btn" onclick="showTab('students')">View Students</button>
             <button class="tab-btn" onclick="showTab('create-course')">Create Course</button>
-            <button class="tab-btn" onclick="showTab('create-student')">Create Student</button>
-            <button class="tab-btn" onclick="showTab('enroll')">Enroll Student</button>
+            <button class="tab-btn" onclick="showTab('enroll')">Enroll in Course</button>
+            <button class="tab-btn" onclick="showTab('profile')">My Profile</button>
         </div>
 
         <div id="courses" class="tab-content active">
@@ -246,7 +430,7 @@
         </div>
 
         <div id="create-course" class="tab-content">
-            <h2> Create New Course</h2>
+            <h2>Create New Course</h2>
             <div id="course-message"></div>
             <form onsubmit="createCourse(event)">
                 <div class="form-group">
@@ -277,42 +461,196 @@
             </form>
         </div>
 
-        <div id="create-student" class="tab-content">
-            <h2> Create New Student</h2>
-            <div id="student-message"></div>
-            <form onsubmit="createStudent(event)">
-                <div class="form-group">
-                    <label>Student Name:</label>
-                    <input type="text" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label>Email:</label>
-                    <input type="email" name="email" required>
-                </div>
-                <button type="submit">Create Student</button>
-            </form>
-        </div>
-
         <div id="enroll" class="tab-content">
-            <h2>Enroll Student in Course</h2>
+            <h2> Enroll in Course</h2>
             <div id="enroll-message"></div>
             <form onsubmit="enrollStudent(event)">
                 <div class="form-group">
-                    <label>Student Email:</label>
-                    <input type="email" name="student_id" required>
-                </div>
-                <div class="form-group">
                     <label>Course ID:</label>
-                    <input type="text" name="course_id" placeholder="e.g., python" required>
+                    <input type="text" name="course_id" placeholder="e.g., python_basics" required>
                 </div>
-                <button type="submit">Enroll Student</button>
+                <button type="submit">Enroll</button>
             </form>
+        </div>
+
+        <div id="profile" class="tab-content">
+            <h2> My Profile</h2>
+            <div id="profile-content"></div>
         </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:8000';
+        let currentUser = null;
+        let isSubmitting = false; // Prevent duplicate submissions
 
+        // Check if user is already logged in (from localStorage)
+        window.onload = function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
+            }
+        };
+
+        // ============= AUTH FUNCTIONS =============
+        function showAuthTab(tabName) {
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.querySelectorAll('.auth-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(`${tabName}-form`).classList.add('active');
+            
+            // Find and activate the correct button
+            const buttons = document.querySelectorAll('.auth-tab-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.toLowerCase() === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Clear any messages
+            document.getElementById('login-message').innerHTML = '';
+            document.getElementById('register-message').innerHTML = '';
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            event.stopPropagation(); // Stop event bubbling
+            
+            // Prevent duplicate submissions
+            if (isSubmitting) {
+                console.log('Already submitting, please wait...');
+                return;
+            }
+            
+            isSubmitting = true;
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch(`${API_URL}/walker/register_user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                console.log('Registration response:', result); // Debug log
+                
+                const msgDiv = document.getElementById('register-message');
+                
+                // Handle both direct response and reports array
+                let actualResult = result;
+                if (result.reports && Array.isArray(result.reports) && result.reports.length > 0) {
+                    actualResult = result.reports[0];
+                }
+                
+                if (actualResult && actualResult.success) {
+                    msgDiv.innerHTML = `<div class="message success">Registration successful! Please login.</div>`;
+                    event.target.reset();
+                    setTimeout(() => {
+                        showAuthTab('login');
+                        msgDiv.innerHTML = '';
+                    }, 2000);
+                } else {
+                    const errorMsg = (actualResult && actualResult.message) || 'Registration failed';
+                    msgDiv.innerHTML = `<div class="message error">${errorMsg}</div>`;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                document.getElementById('register-message').innerHTML = 
+                    `<div class="message error">Error: ${error.message}</div>`;
+            } finally {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register';
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            if (isSubmitting) {
+                return;
+            }
+            
+            isSubmitting = true;
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+            
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch(`${API_URL}/walker/login_user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                console.log('Login response:', result); // Debug log
+                
+                const msgDiv = document.getElementById('login-message');
+                
+                // Handle both direct response and reports array
+                let actualResult = result;
+                if (result.reports && Array.isArray(result.reports) && result.reports.length > 0) {
+                    actualResult = result.reports[0];
+                }
+                
+                if (actualResult && actualResult.success) {
+                    currentUser = actualResult.user;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showMainApp();
+                } else {
+                    const errorMsg = (actualResult && actualResult.message) || 'Login failed';
+                    msgDiv.innerHTML = `<div class="message error">${errorMsg}</div>`;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('login-message').innerHTML = 
+                    `<div class="message error">Error: ${error.message}</div>`;
+            } finally {
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Update user info
+            document.getElementById('user-name').textContent = currentUser.name;
+            document.getElementById('user-email').textContent = currentUser.email;
+            document.getElementById('user-role').textContent = currentUser.role.toUpperCase();
+            document.getElementById('user-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+            
+            // Load initial data
+            loadCourses();
+            loadProfile();
+        }
+
+        // ============= MAIN APP FUNCTIONS =============
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -326,6 +664,7 @@
 
             if (tabName === 'courses') loadCourses();
             if (tabName === 'students') loadStudents();
+            if (tabName === 'profile') loadProfile();
         }
 
         async function loadCourses() {
@@ -335,7 +674,6 @@
                 });
                 const data = await response.json();
                 
-                // Extract courses from reports[0]
                 let courses = [];
                 if (data.reports && data.reports.length > 0) {
                     courses = data.reports[0];
@@ -357,7 +695,8 @@
                         <div class="course-info">${course.duration}</div>
                         <div class="course-info">${course.description}</div>
                         <div class="level-badge">${course.level.toUpperCase()}</div>
-                        <div style="margin-top: 10px; font-size: 0.9em;">ID: ${course.id}</div>
+                        <div style="margin-top: 10px; font-size: 0.9em;"> ID: ${course.id}</div>
+                        <div style="margin-top: 5px; font-size: 0.9em;">${course.enrolled_count} enrolled</div>
                     </div>
                 `).join('');
             } catch (error) {
@@ -372,7 +711,6 @@
                 });
                 const data = await response.json();
                 
-                // Extract students from reports[0]
                 let students = [];
                 if (data.reports && data.reports.length > 0) {
                     students = data.reports[0];
@@ -383,7 +721,7 @@
                 const container = document.getElementById('students-list');
                 
                 if (!Array.isArray(students) || students.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No students found. Create one to get started!</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No students found.</p>';
                     return;
                 }
                 
@@ -403,6 +741,44 @@
                 `).join('');
             } catch (error) {
                 console.error('Error loading students:', error);
+            }
+        }
+
+        async function loadProfile() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/walker/get_user_profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const user = result.user;
+                    document.getElementById('profile-content').innerHTML = `
+                        <div class="student-card">
+                            <h3>Profile Information</h3>
+                            <div style="margin-top: 15px;">
+                                <p><strong>Name:</strong> ${user.name}</p>
+                                <p><strong>Email:</strong> ${user.email}</p>
+                                <p><strong>Role:</strong> <span class="role-badge">${user.role.toUpperCase()}</span></p>
+                                <p><strong>Member Since:</strong> ${new Date(user.created_at).toLocaleDateString()}</p>
+                            </div>
+                            ${user.enrolled_courses && user.enrolled_courses.length > 0 ? `
+                                <div style="margin-top: 20px;">
+                                    <strong>My Enrolled Courses:</strong>
+                                    <div class="enrolled-courses" style="margin-top: 10px;">
+                                        ${user.enrolled_courses.map(c => `<span class="course-badge">${c}</span>`).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
             }
         }
 
@@ -430,34 +806,13 @@
             }
         }
 
-        async function createStudent(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
-
-            try {
-                const response = await fetch(`${API_URL}/walker/create_student`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
-                
-                const msgDiv = document.getElementById('student-message');
-                msgDiv.innerHTML = `<div class="message success">${result.message}</div>`;
-                event.target.reset();
-                
-                setTimeout(() => msgDiv.innerHTML = '', 3000);
-            } catch (error) {
-                document.getElementById('student-message').innerHTML = 
-                    `<div class="message error">Error creating student: ${error.message}</div>`;
-            }
-        }
-
         async function enrollStudent(event) {
             event.preventDefault();
             const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
+            const data = {
+                student_id: currentUser.id,
+                course_id: formData.get('course_id')
+            };
 
             try {
                 const response = await fetch(`${API_URL}/walker/enroll_student`, {
@@ -469,17 +824,17 @@
                 
                 const msgDiv = document.getElementById('enroll-message');
                 msgDiv.innerHTML = `<div class="message ${result.success ? 'success' : 'error'}">${result.message}</div>`;
-                if (result.success) event.target.reset();
+                if (result.success) {
+                    event.target.reset();
+                    loadProfile(); // Refresh profile to show new enrollment
+                }
                 
                 setTimeout(() => msgDiv.innerHTML = '', 3000);
             } catch (error) {
                 document.getElementById('enroll-message').innerHTML = 
-                    `<div class="message error">Error enrolling student: ${error.message}</div>`;
+                    `<div class="message error">Error enrolling: ${error.message}</div>`;
             }
         }
-
-        // Load courses on page load
-        loadCourses();
     </script>
 </body>
 </html>
