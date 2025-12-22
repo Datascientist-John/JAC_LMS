@@ -198,7 +198,7 @@ button.small {
 
     <!-- CREATE COURSE (Instructors Only) -->
     <div id="createCourseSection" class="card hidden">
-        <h2>➕ Create New Course</h2>
+        <h2> Create New Course</h2>
         <div id="createCourseMsg"></div>
         <div class="form-group">
             <label>Course Title</label>
@@ -225,13 +225,13 @@ button.small {
 
     <!-- COURSES LIST -->
     <div class="card">
-        <h2>📚 Courses</h2>
+        <h2>Courses</h2>
         <div id="courses">Loading...</div>
     </div>
 
     <!-- PROFILE -->
     <div class="card">
-        <h2>👤 My Profile</h2>
+        <h2> My Profile</h2>
         <div id="profile"></div>
     </div>
 </div>
@@ -428,7 +428,7 @@ async function loadCourses() {
                 </div>
                 <p>${c.description}</p>
                 <div class="course-meta">
-                    👨‍🏫 ${c.instructor} | 📊 ${c.level} | ⏱ ${c.duration} | 👥 ${c.enrolled_count || 0} enrolled
+                     ${c.instructor} |  ${c.level} | ⏱ ${c.duration} | 👥 ${c.enrolled_count || 0} enrolled
                 </div>
                 ${isStudent && !isEnrolled ? 
                     `<button class="small success" onclick="enrollInCourse('${c.id}', '${c.title.replace(/'/g, "\\'")}')">
