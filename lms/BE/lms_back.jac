@@ -652,7 +652,68 @@ walker view_courses {
         disengage;  # ADDED
     }
 }
+# ==================== ENROLL====================
+walker enroll_course {
+    has user_id: str;
+    has course_id: str;
 
+    can enroll_user with `root entry {
+        # Find the user
+        user_node = None;
+        for user in [-->(`?User)] {
+            if user.id == self.user_id {
+                user_node = user;
+                break;
+            }
+        }
+
+        if not user_node {
+            report {"success": False, "message": "User not found"};
+            disengage;
+        }
+
+        # Find the course
+        course_node = None;
+        for course in [-->(`?Course)] {
+            if course.id == self.course_id {
+                course_node = course;
+                break;
+            }
+        }
+
+        if not course_node {
+            report {"success": False, "message": "Course not found"};
+            disengage;
+        }
+
+        # Find the student node to update enrolled_courses
+        student_node = None;
+        for student in [-->(`?Student)] {
+            if student.id == self.user_id {
+                student_node = student;
+                break;
+            }
+        }
+
+        if not student_node {
+            report {"success": False, "message": "Student record not found"};
+            disengage;
+        }
+
+        # Check if already enrolled
+        if course_node.title in student_node.enrolled_courses {
+            report {"success": False, "message": "Already enrolled in this course"};
+            disengage;
+        }
+
+        # Enroll the user
+        student_node.enrolled_courses.append(course_node.title);
+        course_node.enrolled_count += 1;
+
+        report {"success": True, "message": "Successfully enrolled!"};
+        disengage;
+    }
+}
 # ==================== CLI ENTRY POINT ====================
 
 with entry:__main__ {
